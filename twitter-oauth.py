@@ -87,7 +87,6 @@ def get_twitter(username, tweet_num = 2):
     print("getting data from twitter...")
     resp = requests.get(base_url, params = params, auth = auth)
     python_obj = json.loads(resp.text)
-
     return python_obj
 protected_url = 'https://api.twitter.com/1.1/account/settings.json'
 
