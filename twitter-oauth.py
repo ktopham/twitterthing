@@ -1,5 +1,6 @@
 from requests_oauthlib import OAuth1Session
 import secrets
+import json
 
 client_key = secrets.api_key
 client_secret = secrets.api_secret
@@ -12,12 +13,12 @@ client_secret = secrets.api_secret
 # At this point we have provided our application's credentials
 # so that we have the privelege to do more stuff, like request
 # authorization for a particular user.
-request_token_url = 'https://api.twitter.com/oauth/request_token'
-
-oauth = OAuth1Session(client_key, client_secret=client_secret)
-fetch_response = oauth.fetch_request_token(request_token_url)
-resource_owner_key = fetch_response.get('oauth_token')
-resource_owner_secret = fetch_response.get('oauth_token_secret')
+# request_token_url = 'https://api.twitter.com/oauth/request_token'
+#
+# oauth = OAuth1Session(client_key, client_secret=client_secret)
+# fetch_response = oauth.fetch_request_token(request_token_url)
+# resource_owner_key = fetch_response.get('oauth_token')
+# resource_owner_secret = fetch_response.get('oauth_token_secret')
 
 
 # STEP 2: GET AUTHORIZATION FROM THE USER
@@ -34,11 +35,10 @@ base_authorization_url = 'https://api.twitter.com/oauth/authorize'
 # authorize_url = authorize_url + resource_owner_key
 # print ('Please go here and authorize,', authorize_url)
 # verifier = input('Please input the verifier')
-
-authorization_url = oauth.authorization_url(base_authorization_url)
-print ('Please go here and authorize,', authorization_url)
-verifier = input('Paste the verification code here: ')
-
+#
+# authorization_url = oauth.authorization_url(base_authorization_url)
+# print ('Please go here and authorize,', authorization_url)
+# verifier = input('Paste the verification code here: ')
 
 
 # STEP 3: Now we have verification from the user. It's a special code that
@@ -57,35 +57,48 @@ verifier = input('Paste the verification code here: ')
 #
 # OK, back to work: now we need the access token so we can get some actual
 # data. There is yet another URL we need to hit to get this.
-access_token_url = 'https://api.twitter.com/oauth/access_token'
+# access_token_url = 'https://api.twitter.com/oauth/access_token'
+#
+# oauth = OAuth1Session(client_key,
+#                           client_secret=client_secret,
+#                           resource_owner_key=resource_owner_key,
+#                           resource_owner_secret=resource_owner_secret,
+#                           verifier=verifier)
+# oauth_tokens = oauth.fetch_access_token(access_token_url)
+#
+# resource_owner_key = oauth_tokens.get('oauth_token')
+# resource_owner_secret = oauth_tokens.get('oauth_token_secret')
 
-oauth = OAuth1Session(client_key,
-                          client_secret=client_secret,
-                          resource_owner_key=resource_owner_key,
-                          resource_owner_secret=resource_owner_secret,
-                          verifier=verifier)
-oauth_tokens = oauth.fetch_access_token(access_token_url)
-
-resource_owner_key = oauth_tokens.get('oauth_token')
-resource_owner_secret = oauth_tokens.get('oauth_token_secret')
-
-print(resource_owner_key, resource_owner_secret)
+# print(resource_owner_key, resource_owner_secret)
 
 # STEP 4: And here we go. Finally we can get the user's data, using the
 # access token (in two parts: the token, and the secret)
 # Note that we have to pass in our client key and secret (this belongs to
 # our application) and the "resource owner" key and secret (this belongs
 # to the user that we just logged in)
+
+def get_tweet_txt(tweet_list):
+    text_lst = []
+    for tweet in tweet_list:
+        text_lst.append(tweet['text'])
+def get_twitter(username, tweet_num = 2):
+    base_url = 'https://api.twitter.com/1.1/statuses/user_timeline.json'
+    params = {'screen_name': username, 'count' : tweet_num}
+    print("getting data from twitter...")
+    resp = requests.get(base_url, params = params, auth = auth)
+    python_obj = json.loads(resp.text)
+
+    return python_obj
 protected_url = 'https://api.twitter.com/1.1/account/settings.json'
 
 oauth = OAuth1Session(client_key,
                           client_secret=client_secret,
                           resource_owner_key=resource_owner_key,
                           resource_owner_secret=resource_owner_secret)
-r = oauth.get(protected_url)
-print (r.text)
+# r = oauth.get(protected_url)
+# print (r.text)
 
 protected_url = 'https://api.twitter.com/1.1/search/tweets.json'
-params = {'q':'food'}
+params = {'q':'cats'}
 r = oauth.get(protected_url, params=params)
-print (r.text)
+print(r.text)
